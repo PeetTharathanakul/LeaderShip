@@ -1,0 +1,40 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e18c4253e403a1449b65c1e259f6ec97, type: 3}
+  m_Name: BalanceConfig
+  m_EditorClassIdentifier: 
+  data:
+    ProgressGoal: 100
+    StartTurns: 18
+    StartCredibility: 50
+    StartFatigue: 10
+    StartMorale: 60
+    MoraleFactorBase: 0.6
+    MoraleFactorDivisor: 125
+    FatigueFactorDivisor: 125
+    MoraleChanceDivisor: 250
+    FatigueChanceDivisor: 250
+    CredibilityChanceDivisor: 500
+    MinSuccessChance: 0.05
+    MaxSuccessChance: 0.95
+    CredibilityGainK: 20
+    RepeatPenaltySecond: 6
+    RepeatPenaltyThirdPlus: 14
+    PushTiredThreshold: 70
+    PushTiredPenalty: 10
+    RefusalThreshold: 25
+    RefusalChancePerPoint: 0.02
+    BurnoutEnter: 100
+    BurnoutExit: 70
+    EventChancePerTurn: 0.35
+    EventFirstEligibleTurn: 2
+    EventMinGapTurns: 1

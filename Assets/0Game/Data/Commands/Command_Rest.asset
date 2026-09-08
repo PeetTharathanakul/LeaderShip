@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 0}
+  m_Name: Command_Rest
+  m_EditorClassIdentifier: LeaderShip.Runtime:LeaderShip.Data:CommandDefinitionSO
+  definition:
+    Type: 3
+    DisplayName: Let Rest
+    Description: Always works and cuts fatigue sharply. The price is the turn itself,
+      and it earns no credibility at all.
+    AlwaysSucceeds: 1
+    BaseSuccessChance: 1
+    ProgressOnSuccess: 0
+    FatigueDelta: -32
+    MoraleDelta: 4
+    ProgressOnFail: 0
+    MoraleDeltaOnFail: 0

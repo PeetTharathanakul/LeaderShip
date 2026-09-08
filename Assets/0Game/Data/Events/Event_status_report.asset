@@ -1,0 +1,42 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 0}
+  m_Name: Event_status_report
+  m_EditorClassIdentifier: LeaderShip.Runtime:LeaderShip.Data:EventDefinitionSO
+  definition:
+    Id: status_report
+    Title: Leadership calls you in for a progress report
+    Body: They want you to walk them through the state of the project yourself.
+    BaseSuccessChance: 0.65
+    OnAcceptSuccess:
+      ProgressDelta: 0
+      CredibilityDelta: 12
+      DeadlineDelta: 0
+      TeamFatigueDelta: 0
+      TeamMoraleDelta: 0
+      Text: You explained it clearly and leadership relaxed.
+    OnAcceptFail:
+      ProgressDelta: 0
+      CredibilityDelta: -12
+      DeadlineDelta: -1
+      TeamFatigueDelta: 0
+      TeamMoraleDelta: 0
+      Text: Your answers were vague, so they asked for delivery sooner.
+    OnDecline:
+      ProgressDelta: 0
+      CredibilityDelta: -8
+      DeadlineDelta: 0
+      TeamFatigueDelta: 0
+      TeamMoraleDelta: 0
+      Text: You sent someone else, and the team saw you dodge it.
+    WarningLeadTurns: 0
+    WarningDeadlineCut: 0

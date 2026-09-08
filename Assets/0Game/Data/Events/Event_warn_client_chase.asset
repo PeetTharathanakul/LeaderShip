@@ -1,0 +1,42 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 0}
+  m_Name: Event_warn_client_chase
+  m_EditorClassIdentifier: LeaderShip.Runtime:LeaderShip.Data:EventDefinitionSO
+  definition:
+    Id: warn_client_chase
+    Title: The client has started chasing
+    Body: Two chasing emails back to back, and the tone has changed.
+    BaseSuccessChance: 0.55
+    OnAcceptSuccess:
+      ProgressDelta: 0
+      CredibilityDelta: 0
+      DeadlineDelta: 0
+      TeamFatigueDelta: 0
+      TeamMoraleDelta: 0
+      Text: 
+    OnAcceptFail:
+      ProgressDelta: 0
+      CredibilityDelta: 0
+      DeadlineDelta: 0
+      TeamFatigueDelta: 0
+      TeamMoraleDelta: 0
+      Text: 
+    OnDecline:
+      ProgressDelta: 0
+      CredibilityDelta: 0
+      DeadlineDelta: 0
+      TeamFatigueDelta: 0
+      TeamMoraleDelta: 0
+      Text: 
+    WarningLeadTurns: 2
+    WarningDeadlineCut: 2

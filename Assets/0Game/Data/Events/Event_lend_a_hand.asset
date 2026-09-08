@@ -1,0 +1,42 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 0}
+  m_Name: Event_lend_a_hand
+  m_EditorClassIdentifier: LeaderShip.Runtime:LeaderShip.Data:EventDefinitionSO
+  definition:
+    Id: lend_a_hand
+    Title: The team next door wants to borrow someone for half a day
+    Body: The project beside yours is drowning and they are asking for a hand.
+    BaseSuccessChance: 0.6
+    OnAcceptSuccess:
+      ProgressDelta: 0
+      CredibilityDelta: 6
+      DeadlineDelta: 0
+      TeamFatigueDelta: 6
+      TeamMoraleDelta: 0
+      Text: Helping out earns goodwill on both sides.
+    OnAcceptFail:
+      ProgressDelta: -4
+      CredibilityDelta: -8
+      DeadlineDelta: 0
+      TeamFatigueDelta: 10
+      TeamMoraleDelta: 0
+      Text: You helped, your own work stalled, and the team started grumbling.
+    OnDecline:
+      ProgressDelta: 0
+      CredibilityDelta: -5
+      DeadlineDelta: 0
+      TeamFatigueDelta: 0
+      TeamMoraleDelta: -4
+      Text: The team notices that you never help anyone.
+    WarningLeadTurns: 0
+    WarningDeadlineCut: 0

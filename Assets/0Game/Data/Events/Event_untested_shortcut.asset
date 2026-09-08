@@ -1,0 +1,43 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 0}
+  m_Name: Event_untested_shortcut
+  m_EditorClassIdentifier: LeaderShip.Runtime:LeaderShip.Data:EventDefinitionSO
+  definition:
+    Id: untested_shortcut
+    Title: Someone proposes a shortcut nobody has tried
+    Body: A team member suggests a new approach that could save a lot of time, but
+      no one has used it before.
+    BaseSuccessChance: 0.45
+    OnAcceptSuccess:
+      ProgressDelta: 18
+      CredibilityDelta: 0
+      DeadlineDelta: 0
+      TeamFatigueDelta: 0
+      TeamMoraleDelta: 6
+      Text: The new approach works and the person who proposed it is beaming.
+    OnAcceptFail:
+      ProgressDelta: -10
+      CredibilityDelta: -12
+      DeadlineDelta: 0
+      TeamFatigueDelta: 0
+      TeamMoraleDelta: 0
+      Text: It broke, and the time is gone for nothing.
+    OnDecline:
+      ProgressDelta: 0
+      CredibilityDelta: 0
+      DeadlineDelta: 0
+      TeamFatigueDelta: 0
+      TeamMoraleDelta: -8
+      Text: They went quiet. They probably will not propose anything next time.
+    WarningLeadTurns: 0
+    WarningDeadlineCut: 0

@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 0}
+  m_Name: Member_kai
+  m_EditorClassIdentifier: LeaderShip.Runtime:LeaderShip.Data:MemberDefinitionSO
+  definition:
+    Id: kai
+    DisplayName: Kai
+    Nickname: I can read you. One trick on repeat and you lose me.
+    BaseOutput: 1.5
+    PushProgressMult: 0.6
+    PushMoraleLossMult: 1
+    WorkProgressMult: 1.2
+    DirectMoraleMult: 1
+    FatigueGainMult: 0.9
+    RepeatPenaltyMult: 2

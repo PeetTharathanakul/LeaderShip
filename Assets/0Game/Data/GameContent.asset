@@ -1,0 +1,33 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 0}
+  m_Name: GameContent
+  m_EditorClassIdentifier: LeaderShip.Runtime:LeaderShip.Data:GameContentSO
+  balance: {fileID: 11400000, guid: bcd5f8972303b634780a6b6598d83fb2, type: 2}
+  members:
+  - {fileID: 11400000, guid: f5c3fecb5ae70b543b28cff6a220e1f1, type: 2}
+  - {fileID: 11400000, guid: 391a9e2a359c0a24e9830e2ed103c869, type: 2}
+  - {fileID: 11400000, guid: eedf6775b4325be4882a26604cc63ddf, type: 2}
+  commands:
+  - {fileID: 11400000, guid: b1d7605780801be47b423d1b8fd6525b, type: 2}
+  - {fileID: 11400000, guid: 084500dd23076074faf23c15ce28cbb6, type: 2}
+  - {fileID: 11400000, guid: 15e659d8f9e3b614c862b0c7b945ba2c, type: 2}
+  - {fileID: 11400000, guid: 16412bc0407485d4992a85e679b0219b, type: 2}
+  events:
+  - {fileID: 11400000, guid: f782e7a238d89b340aa4f3afd061a9b6, type: 2}
+  - {fileID: 11400000, guid: f4c4ae82d35f5fa4c94a1d5bbf3a1faa, type: 2}
+  - {fileID: 11400000, guid: e7064560376cc5646a0c53f438c45b76, type: 2}
+  - {fileID: 11400000, guid: fec79b4bac0acb243944441af092063b, type: 2}
+  - {fileID: 11400000, guid: 30f6d31a57a039046b959fcf752ddae4, type: 2}
+  - {fileID: 11400000, guid: 20f0e986e10d3a3408316bd9c19babf2, type: 2}
+  - {fileID: 11400000, guid: ce829f1a16d459b44af42a70d5509a33, type: 2}
+  - {fileID: 11400000, guid: 0e0224e502a72794981261f2705fecbb, type: 2}

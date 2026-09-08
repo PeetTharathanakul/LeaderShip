@@ -1,0 +1,42 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 0}
+  m_Name: Event_leave_on_time
+  m_EditorClassIdentifier: LeaderShip.Runtime:LeaderShip.Data:EventDefinitionSO
+  definition:
+    Id: leave_on_time
+    Title: The team asks to leave on time all week
+    Body: Everyone is running on fumes and asks for one week of leaving on time.
+    BaseSuccessChance: 0.75
+    OnAcceptSuccess:
+      ProgressDelta: 0
+      CredibilityDelta: 0
+      DeadlineDelta: 0
+      TeamFatigueDelta: -12
+      TeamMoraleDelta: 10
+      Text: Everyone comes back noticeably sharper.
+    OnAcceptFail:
+      ProgressDelta: -6
+      CredibilityDelta: 0
+      DeadlineDelta: 0
+      TeamFatigueDelta: -6
+      TeamMoraleDelta: 0
+      Text: They did get the rest, but the work piled up while they were gone.
+    OnDecline:
+      ProgressDelta: 0
+      CredibilityDelta: 0
+      DeadlineDelta: 0
+      TeamFatigueDelta: 5
+      TeamMoraleDelta: -10
+      Text: The team stays late, but the mood is not the same afterwards.
+    WarningLeadTurns: 0
+    WarningDeadlineCut: 0

@@ -1,0 +1,43 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 0}
+  m_Name: Event_personal_talk
+  m_EditorClassIdentifier: LeaderShip.Runtime:LeaderShip.Data:EventDefinitionSO
+  definition:
+    Id: personal_talk
+    Title: A team member wants to talk about something personal
+    Body: Someone asks for a word. They say it is not about work directly.
+    BaseSuccessChance: 0.7
+    OnAcceptSuccess:
+      ProgressDelta: 0
+      CredibilityDelta: 0
+      DeadlineDelta: 0
+      TeamFatigueDelta: 4
+      TeamMoraleDelta: 12
+      Text: You talked it through and they left a great deal lighter.
+    OnAcceptFail:
+      ProgressDelta: 0
+      CredibilityDelta: -8
+      DeadlineDelta: 0
+      TeamFatigueDelta: 0
+      TeamMoraleDelta: -6
+      Text: You said the wrong thing at the wrong moment and it spread through the
+        whole team.
+    OnDecline:
+      ProgressDelta: 0
+      CredibilityDelta: 0
+      DeadlineDelta: 0
+      TeamFatigueDelta: 0
+      TeamMoraleDelta: -8
+      Text: You told them it could wait. They never came back.
+    WarningLeadTurns: 0
+    WarningDeadlineCut: 0
