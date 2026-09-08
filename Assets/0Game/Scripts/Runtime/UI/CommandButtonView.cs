@@ -1,4 +1,5 @@
 using System;
+using System.Text;
 using LeaderShip.Model;
 using TMPro;
 using UnityEngine;
@@ -28,7 +29,14 @@ namespace LeaderShip.UI
         void Awake()
         {
             if (button == null) Debug.LogError($"[{nameof(CommandButtonView)}] '{name}' ไม่ได้ใส่ button", this);
-            else button.onClick.AddListener(() => Clicked?.Invoke(type));
+            else button.onClick.AddListener(OnClick);
+        }
+
+        void OnClick()
+        {
+            // กระตุกปุ่มที่เพิ่งกด เพื่อให้ตาเชื่อมโยงได้ว่าผลที่กำลังจะขึ้นกลางจอมาจากปุ่มไหน
+            UiTween.Punch(transform, 0.12f, 0.26f);
+            Clicked?.Invoke(type);
         }
 
         public void Refresh(TurnEngine engine, int memberIndex, bool interactable)
@@ -77,44 +85,69 @@ namespace LeaderShip.UI
                 frame.color = usable ? Palette.PanelBorder : Palette.ButtonDisabled;
         }
 
+        /// <summary>
+        /// ตารางสองคอลัมน์ ชื่อค่าอยู่ซ้าย ตัวเลขอยู่ขวา บรรทัดละค่า
+        ///
+        /// ของเดิมเป็นข้อความยาวต่อกันคั่นด้วยช่องว่าง ซึ่งอ่านเทียบระหว่างปุ่มไม่ได้เลย
+        /// ทั้งที่การเทียบสี่ปุ่มคือสิ่งเดียวที่ผู้เล่นต้องทำในทุกเทิร์น
+        /// สีบอกว่าค่านั้นดีหรือแย่ **สำหรับผู้เล่น** ไม่ใช่ตามเครื่องหมาย — Fatigue +18 คือแย่
+        /// </summary>
         static string BuildDetail(CommandPreview p)
         {
-            string s = "";
+            var sb = new StringBuilder();
 
-            if (p.ProgressOnSuccess != 0f) s += $"Progress {GameText.Signed(p.ProgressOnSuccess)}%   ";
-            if (p.ProgressOnFail < 0f) s += $"Rework on miss {GameText.Num(p.ProgressOnFail)}%   ";
-            if (p.FatigueDelta != 0f) s += $"Fatigue {GameText.Signed(p.FatigueDelta, 0)}   ";
-            if (p.MoraleOnSuccess != 0f) s += $"Morale {GameText.Signed(p.MoraleOnSuccess, 0)}   ";
+            if (p.ProgressOnSuccess != 0f)
+                Row(sb, "Progress", GameText.Signed(p.ProgressOnSuccess) + "%", Palette.Good);
+
+            if (p.ProgressOnFail < 0f)
+                Row(sb, "On miss", GameText.Num(p.ProgressOnFail) + "%", Palette.Danger);
+
+            if (p.FatigueDelta != 0f)
+                Row(sb, "Fatigue", GameText.Signed(p.FatigueDelta, 0),
+                    p.FatigueDelta > 0f ? Palette.Danger : Palette.Good);
+
+            if (p.MoraleOnSuccess != 0f)
+                Row(sb, "Morale", GameText.Signed(p.MoraleOnSuccess, 0),
+                    p.MoraleOnSuccess > 0f ? Palette.Good : Palette.Danger);
 
             if (!p.AlwaysSucceeds && p.CredibilityGainOnSuccess >= 1f)
-                s += $"Credibility on success {GameText.Signed(p.CredibilityGainOnSuccess, 0)}";
+                Row(sb, "Credibility", GameText.Signed(p.CredibilityGainOnSuccess, 0), Palette.Credibility);
 
-            return s.TrimEnd();
+            return sb.ToString().TrimEnd('\n');
         }
 
+        /// <summary>ค่าตัวเลขชิดขวาด้วยแท็ก &lt;pos&gt; ของ TMP — ไม่ต้องใช้ layout group ให้เปลืองเฟรม</summary>
+        static void Row(StringBuilder sb, string label, string value, Color valueColor)
+        {
+            sb.Append(label)
+              .Append("<pos=62%><color=#")
+              .Append(ColorUtility.ToHtmlStringRGB(valueColor))
+              .Append('>')
+              .Append(value)
+              .Append("</color>\n");
+        }
+
+        /// <summary>
+        /// ราคาที่ต้องจ่ายเพราะ "สั่งแบบนี้ตอนนี้" ไม่ใช่เพราะสำเร็จหรือล้มเหลว
+        /// ต้องขึ้นบรรทัดแยกทีละข้อ ผู้เล่นถึงจะเห็นว่ามีกี่ข้อพร้อมกัน
+        /// </summary>
         string BuildWarning(CommandPreview p, TurnEngine engine)
         {
             if (p.Blocked)
                 return "Burned out — let them rest first";
 
-            string s = "";
+            var sb = new StringBuilder();
 
             if (p.RepeatPenalty > 0f)
-                s += $"Same order {p.ConsecutiveIfChosen}x in a row · Credibility −{GameText.Num(p.RepeatPenalty, 0)}";
+                sb.Append($"• Same order {p.ConsecutiveIfChosen}x in a row · Credibility −{GameText.Num(p.RepeatPenalty, 0)}\n");
 
             if (p.PushTiredPenalty > 0f)
-            {
-                if (s.Length > 0) s += "   ";
-                s += $"Pushing someone exhausted · Credibility −{GameText.Num(p.PushTiredPenalty, 0)}";
-            }
+                sb.Append($"• Pushing someone exhausted · Credibility −{GameText.Num(p.PushTiredPenalty, 0)}\n");
 
             if (p.RefusalChance > 0f)
-            {
-                if (s.Length > 0) s += "   ";
-                s += $"May be refused · {GameText.Percent(p.RefusalChance)}";
-            }
+                sb.Append($"• {GameText.Percent(p.RefusalChance)} chance they refuse outright\n");
 
-            return s;
+            return sb.ToString().TrimEnd('\n');
         }
 
 #if UNITY_EDITOR

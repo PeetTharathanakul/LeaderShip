@@ -52,10 +52,10 @@ namespace LeaderShip.UI
         {
             // เดดไลน์ที่กำลังจะหดต้องเห็นตลอดเวลา ไม่ใช่โผล่มาบรรทัดเดียวใน log แล้วหายไป
             if (state.PendingCut.IsActive)
-                return $"⚠ {state.PendingCut.Reason} — in {state.PendingCut.TurnsRemaining} turns the deadline loses {state.PendingCut.Amount}";
+                return $"[!]  {state.PendingCut.Reason} — in {state.PendingCut.TurnsRemaining} turns the deadline loses {state.PendingCut.Amount}";
 
             if (state.Credibility < state.Balance.RefusalThreshold)
-                return $"⚠ The team is doubting your orders — {GameText.Percent(state.RefusalChance())} chance of refusal";
+                return $"[!]  The team is doubting your orders — {GameText.Percent(state.RefusalChance())} chance of refusal";
 
             return "";
         }

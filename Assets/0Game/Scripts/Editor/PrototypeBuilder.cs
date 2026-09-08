@@ -74,17 +74,24 @@ namespace LeaderShip.EditorTools
             var cards = BuildMemberCards(canvasRect, content);
             var commandBar = BuildCommandBar(canvasRect);
             var log = BuildLogPanel(canvasRect);
+
+            // ลำดับพี่น้อง = ลำดับการวาด ของที่ต้องอยู่บนสุดต้องสร้างทีหลัง
+            // กล่องเหตุการณ์ → ป๊อปอัปสรุป → แฟลชกลางจอ → หน้าจบรอบ
             var dialog = BuildEventDialog(canvasRect);
+            var popup = BuildOutcomePopup(canvasRect);
+            var flash = BuildOutcomeFlash(canvasRect);
             var result = BuildResultPanel(canvasRect);
 
             var screen = canvas.gameObject.AddComponent<GameplayScreen>();
-            screen.EditorAssign(runManager, hud, cards, commandBar.Buttons, dialog, log, result, commandBar.HintText);
+            screen.EditorAssign(runManager, hud, cards, commandBar.Buttons, dialog, log, result,
+                commandBar.HintText, flash, popup);
 
             EditorSceneManager.MarkSceneDirty(scene);
             Selection.activeGameObject = canvas.gameObject;
 
             Debug.Log("[PrototypeBuilder] ประกอบหน้าจอเสร็จ — กด Play ได้เลย\n" +
-                      "คีย์ลัด: 1-3 เลือกลูกทีม · Q เร่งงาน · W ทำงาน · E ทิศทาง · R ให้พัก · Y/N ตอบเหตุการณ์");
+                      "คีย์ลัด: 1-3 เลือกลูกทีม · Q เร่งงาน · W ทำงาน · E ทิศทาง · R ให้พัก · " +
+                      "Y/N ตอบเหตุการณ์ · Space ปิดป๊อปอัปผลลัพธ์");
         }
 
         // ------------------------------------------------------------------ โหลดของ
@@ -265,8 +272,12 @@ namespace LeaderShip.EditorTools
 
                 var border = panel.Find("Border").GetComponent<Image>();
 
-                var nameText = Text("Name", panel, 20, 14, 332, 42, def.DisplayName, 30,
+                var nameText = Text("Name", panel, 20, 14, 268, 42, def.DisplayName, 30,
                     Palette.TextPrimary, TextAlignmentOptions.Left);
+
+                // ป้ายเลขคีย์ลัดติดกับการ์ดโดยตรง แทนที่จะเขียนรวมไว้บรรทัดเดียวที่อื่น
+                // ผู้เล่นถึงจะรู้ว่าเลข 1 หมายถึงใบไหนโดยไม่ต้องนับเอง
+                KeyBadge($"Key_{i + 1}", panel, 296, 16, (i + 1).ToString());
 
                 var nickname = Text("Nickname", panel, 20, 58, 332, 62, $"“{def.Nickname}”", 17,
                     Palette.TextMuted, TextAlignmentOptions.TopLeft);
@@ -278,8 +289,13 @@ namespace LeaderShip.EditorTools
                 var output = Text("Output", panel, 20, 230, 332, 32, "", 19,
                     Palette.Progress, TextAlignmentOptions.Left);
 
-                var status = Text("Status", panel, 20, 270, 332, 142, "", 17,
+                var status = Text("Status", panel, 20, 270, 332, 108, "", 17,
                     Palette.TextMuted, TextAlignmentOptions.TopLeft);
+
+                // ป้ายบอกว่ากำลังสั่งใบนี้ — สีขอบอย่างเดียวมองข้ามง่ายเกินไปบนพื้นเข้ม
+                var selectedTag = Text("SelectedTag", panel, 20, 384, 332, 30, "— COMMANDING —", 17,
+                    Palette.PanelBorderActive, TextAlignmentOptions.Center);
+                selectedTag.gameObject.SetActive(false);
 
                 // ทั้งใบกดได้ ไม่ใช่แค่ปุ่มเล็ก ๆ — เป้าคลิกใหญ่ อ่านง่าย และเดาได้ว่ากดตรงไหนก็ได้
                 var button = panel.gameObject.AddComponent<Button>();
@@ -288,7 +304,7 @@ namespace LeaderShip.EditorTools
                 button.colors = CardColors();
 
                 var card = panel.gameObject.AddComponent<MemberCardView>();
-                card.EditorAssign(border, button, nameText, nickname, output, status, fatigue, morale);
+                card.EditorAssign(border, button, nameText, nickname, output, status, fatigue, morale, selectedTag);
                 cards.Add(card);
             }
 
@@ -311,7 +327,8 @@ namespace LeaderShip.EditorTools
             var hint = Text("SelectionHint", panel, 24, 14, 700, 38, "Commanding: —", 24,
                 Palette.TextPrimary, TextAlignmentOptions.Left);
 
-            Text("Shortcuts", panel, 724, 16, 404, 34, "Q Push · W Work · E Direct · R Rest", 17,
+            // คีย์ลัดย้ายไปติดกับปุ่มของมันแล้ว บรรทัดนี้จึงเอาไว้ย้ำสัญญาข้อสำคัญของเกมแทน (ADR-0005)
+            Text("Promise", panel, 700, 16, 428, 34, "The % you see is the % the game rolls", 17,
                 Palette.TextMuted, TextAlignmentOptions.Right);
 
             var types = new[] { CommandType.Push, CommandType.Work, CommandType.Direct, CommandType.Rest };
@@ -329,8 +346,10 @@ namespace LeaderShip.EditorTools
 
                 var border = buttonPanel.Find("Border").GetComponent<Image>();
 
-                var title = Text("Title", buttonPanel, 14, 12, 245, 42, GameText.CommandName(types[i]), 26,
+                var title = Text("Title", buttonPanel, 14, 12, 190, 42, GameText.CommandName(types[i]), 26,
                     Palette.TextPrimary, TextAlignmentOptions.Left);
+
+                KeyBadge($"Key_{types[i]}", buttonPanel, 213, 14, ShortcutFor(types[i]));
 
                 var chance = Text("Chance", buttonPanel, 14, 56, 245, 34, "", 21,
                     Palette.Good, TextAlignmentOptions.Left);
@@ -410,6 +429,13 @@ namespace LeaderShip.EditorTools
 
         // ------------------------------------------------------------------ กล่องเหตุการณ์
 
+        /// <summary>
+        /// กล่องเหตุการณ์แบบ "การ์ดสองใบ ปุ่มอยู่ในใบของตัวเอง"
+        ///
+        /// ของเดิมเรียงข้อความกับปุ่มสลับกันลงมาเป็นแถวเดียว ผู้เล่นจึงอ่านไม่ออกว่า
+        /// ข้อความไหนเป็นของปุ่มไหน และไม่รู้ว่าข้อความนั้นคือ "สิ่งที่จะเกิดถ้ากด" หรือ "สิ่งที่เกิดไปแล้ว"
+        /// วางกรอบครอบทีละทางเลือก + หัวการ์ดขึ้นต้นด้วย "IF YOU ..." จึงตอบทั้งสองเรื่องพร้อมกัน
+        /// </summary>
         static EventDialogView BuildEventDialog(RectTransform parent)
         {
             // ตัวคอมโพเนนต์ต้องอยู่บนอ็อบเจกต์ที่ **แอ็กทีฟตลอด** ส่วนที่ปิด/เปิดคือลูกของมัน
@@ -419,34 +445,170 @@ namespace LeaderShip.EditorTools
             var root = FullScreen("Overlay", holder);
 
             var dimmer = root.gameObject.AddComponent<Image>();
-            dimmer.color = Palette.WithAlpha(Color.black, 0.72f);
+            dimmer.color = Palette.WithAlpha(Color.black, 0.78f);
+            var dimmerGroup = root.gameObject.AddComponent<CanvasGroup>();
 
-            var panel = CenteredPanel("Dialog", root, 900, 620,
+            var panel = CenteredPanel("Dialog", root, 1000, 716,
                 _dialogSprite, _dialogBorderSprite, Palette.PanelFill, Palette.PanelBorderActive);
+            var panelGroup = panel.gameObject.AddComponent<CanvasGroup>();
 
-            var title = Text("Title", panel, 30, 24, 840, 52, "", 34,
+            Text("Kicker", panel, 30, 20, 940, 30, "SOMETHING CAME UP — PICK ONE", 17,
+                Palette.TextMuted, TextAlignmentOptions.Left);
+
+            var title = Text("Title", panel, 30, 52, 940, 52, "", 34,
                 Palette.TextPrimary, TextAlignmentOptions.Left);
 
-            var body = Text("Body", panel, 30, 80, 840, 68, "", 21,
+            var body = Text("Body", panel, 30, 108, 940, 60, "", 21,
                 Palette.TextMuted, TextAlignmentOptions.TopLeft);
 
-            var chance = Text("Chance", panel, 30, 152, 840, 40, "", 24,
+            // ---- การ์ด "ถ้ารับ" ------------------------------------------------
+            var acceptCard = Panel("AcceptCard", panel, 30, 178, 940, 274,
+                _buttonSprite, _buttonBorderSprite, Palette.PanelFillRaised, Palette.Good);
+            var acceptGroup = acceptCard.gameObject.AddComponent<CanvasGroup>();
+
+            var acceptHeader = Text("Header", acceptCard, 24, 14, 560, 36, "IF YOU ACCEPT", 22,
                 Palette.Good, TextAlignmentOptions.Left);
 
-            Divider("Divider", panel, 30, 196, 840, 20);
+            var acceptChance = Text("Chance", acceptCard, 600, 12, 316, 40, "", 26,
+                Palette.Good, TextAlignmentOptions.Right);
 
-            var acceptDetail = Text("AcceptDetail", panel, 30, 220, 840, 120, "", 19,
+            var acceptSuccess = Text("SuccessLine", acceptCard, 24, 58, 892, 62, "", 19,
                 Palette.TextPrimary, TextAlignmentOptions.TopLeft);
 
-            var accept = TextButton("AcceptButton", panel, 30, 344, 840, 76, "Accept", 28, Palette.Good);
-
-            var declineDetail = Text("DeclineDetail", panel, 30, 432, 840, 80, "", 19,
+            var acceptFail = Text("FailLine", acceptCard, 24, 122, 892, 62, "", 19,
                 Palette.TextPrimary, TextAlignmentOptions.TopLeft);
 
-            var decline = TextButton("DeclineButton", panel, 30, 516, 840, 76, "Decline", 28, Palette.Warning);
+            var accept = TextButton("AcceptButton", acceptCard, 24, 192, 892, 64, "Accept   (Y)", 26, Palette.Good);
+
+            // ---- การ์ด "ถ้าไม่รับ" ---------------------------------------------
+            var declineCard = Panel("DeclineCard", panel, 30, 468, 940, 212,
+                _buttonSprite, _buttonBorderSprite, Palette.PanelFillRaised, Palette.Warning);
+            var declineGroup = declineCard.gameObject.AddComponent<CanvasGroup>();
+
+            var declineHeader = Text("Header", declineCard, 24, 14, 892, 36, "IF YOU DECLINE", 22,
+                Palette.Warning, TextAlignmentOptions.Left);
+
+            var decline = Text("DeclineLine", declineCard, 24, 56, 892, 62, "", 19,
+                Palette.TextPrimary, TextAlignmentOptions.TopLeft);
+
+            var declineButton = TextButton("DeclineButton", declineCard, 24, 130, 892, 64, "Decline   (N)", 26,
+                Palette.Warning);
 
             var view = holder.gameObject.AddComponent<EventDialogView>();
-            view.EditorAssign(root.gameObject, title, body, chance, acceptDetail, declineDetail, accept, decline);
+            view.EditorAssign(root.gameObject, panel, panelGroup, dimmerGroup, title, body,
+                acceptCard, acceptGroup, acceptHeader, acceptChance, acceptSuccess, acceptFail, accept,
+                declineCard, declineGroup, declineHeader, decline, declineButton);
+
+            root.gameObject.SetActive(false);
+            return view;
+        }
+
+        // ------------------------------------------------------------------ ผลลัพธ์กลางจอ
+
+        /// <summary>
+        /// พาดหัว SUCCESS / FAILED กลางจอ
+        /// มี blocker โปร่งใสกินทั้งจอ เพื่อไม่ให้เมาส์ไปโดนปุ่มข้างหลังระหว่างอนิเมชันกำลังเล่น
+        /// </summary>
+        static OutcomeFlashView BuildOutcomeFlash(RectTransform parent)
+        {
+            var holder = FullScreen("OutcomeFlash", parent);
+            var root = FullScreen("Overlay", holder);
+
+            // ฉากหลังหรี่เป็นชั้นแยก ไม่ใช่ CanvasGroup บน root
+            // ถ้าใส่บน root ค่า alpha จะไปคูณกับ alpha ของตัวอักษรด้วย แล้วคุมจังหวะสองอย่างพร้อมกันไม่ได้
+            var dimmerRect = FullScreen("Dimmer", root);
+            var blocker = dimmerRect.gameObject.AddComponent<Image>();
+            blocker.color = Palette.WithAlpha(Palette.Background, 0.86f);
+            var dimmerGroup = dimmerRect.gameObject.AddComponent<CanvasGroup>();
+
+            var panel = NewRect("Flash", root, 0, 0, 1200, 230);
+            panel.anchorMin = new Vector2(0.5f, 0.5f);
+            panel.anchorMax = new Vector2(0.5f, 0.5f);
+            panel.pivot = new Vector2(0.5f, 0.5f);
+            panel.anchoredPosition = Vector2.zero;
+            panel.sizeDelta = new Vector2(1200, 230);
+
+            var group = panel.gameObject.AddComponent<CanvasGroup>();
+            group.blocksRaycasts = false;
+
+            var headline = Text("Headline", panel, 0, 0, 1200, 150, "SUCCESS", 116,
+                Palette.Good, TextAlignmentOptions.Center);
+            headline.fontStyle = FontStyles.Bold;
+
+            var caption = Text("Caption", panel, 0, 150, 1200, 60, "", 30,
+                Palette.TextPrimary, TextAlignmentOptions.Center);
+
+            var view = holder.gameObject.AddComponent<OutcomeFlashView>();
+            view.EditorAssign(root.gameObject, panel, group, dimmerGroup, headline, caption);
+            root.gameObject.SetActive(false);
+            return view;
+        }
+
+        /// <summary>ป๊อปอัปสรุป "ได้อะไร เสียอะไร เพราะอะไร" — บรรทัดค่าถูกสร้างล่วงหน้าแล้วเปิด/ปิดเอา</summary>
+        static OutcomePopupView BuildOutcomePopup(RectTransform parent)
+        {
+            const int MaxRows = 5;
+
+            var holder = FullScreen("OutcomePopup", parent);
+            var root = FullScreen("Overlay", holder);
+
+            var dimmer = root.gameObject.AddComponent<Image>();
+            dimmer.color = Palette.WithAlpha(Color.black, 0.74f);
+            var dimmerGroup = root.gameObject.AddComponent<CanvasGroup>();
+
+            var panel = CenteredPanel("Popup", root, 840, 646,
+                _dialogSprite, _dialogBorderSprite, Palette.PanelFill, Palette.PanelBorderActive);
+            var panelGroup = panel.gameObject.AddComponent<CanvasGroup>();
+
+            var title = Text("Title", panel, 30, 24, 780, 40, "", 24,
+                Palette.TextMuted, TextAlignmentOptions.Left);
+
+            var status = Text("Status", panel, 30, 62, 780, 76, "", 58,
+                Palette.Good, TextAlignmentOptions.Left);
+            status.fontStyle = FontStyles.Bold;
+
+            var reason = Text("Reason", panel, 30, 146, 780, 96, "", 20,
+                Palette.TextPrimary, TextAlignmentOptions.TopLeft);
+
+            Divider("Divider", panel, 30, 248, 780, 20);
+
+            Text("RowsTitle", panel, 30, 268, 780, 28, "WHAT IT COST AND WHAT IT BOUGHT", 16,
+                Palette.TextMuted, TextAlignmentOptions.Left);
+
+            var empty = Text("Empty", panel, 30, 302, 780, 46, "", 20,
+                Palette.TextMuted, TextAlignmentOptions.TopLeft);
+            empty.gameObject.SetActive(false);
+
+            var rows = new OutcomePopupView.DeltaRow[MaxRows];
+            for (int i = 0; i < MaxRows; i++)
+            {
+                var rowRect = NewRect($"Row_{i}", panel, 30, 302 + i * 46, 780, 42);
+                var rowGroup = rowRect.gameObject.AddComponent<CanvasGroup>();
+
+                var label = Text("Label", rowRect, 0, 0, 420, 42, "", 22,
+                    Palette.TextMuted, TextAlignmentOptions.Left);
+
+                var value = Text("Value", rowRect, 420, 0, 360, 42, "", 26,
+                    Palette.TextPrimary, TextAlignmentOptions.Right);
+
+                rowRect.gameObject.SetActive(false);
+
+                rows[i] = new OutcomePopupView.DeltaRow
+                {
+                    Root = rowRect,
+                    Group = rowGroup,
+                    Label = label,
+                    Value = value
+                };
+            }
+
+            var continueButton = TextButton("ContinueButton", panel, 30, 546, 780, 72,
+                "Continue   (Space)", 26, Palette.Progress);
+
+            var view = holder.gameObject.AddComponent<OutcomePopupView>();
+            view.EditorAssign(root.gameObject, panel, panelGroup, dimmerGroup, title, status, reason, empty,
+                rows, continueButton);
+
             root.gameObject.SetActive(false);
             return view;
         }
@@ -463,6 +625,7 @@ namespace LeaderShip.EditorTools
 
             var panel = CenteredPanel("Result", root, 760, 520,
                 _dialogSprite, _dialogBorderSprite, Palette.PanelFill, Palette.PanelBorderActive);
+            var panelGroup = panel.gameObject.AddComponent<CanvasGroup>();
 
             var title = Text("Title", panel, 30, 28, 700, 70, "", 46,
                 Palette.TextPrimary, TextAlignmentOptions.Left);
@@ -481,7 +644,7 @@ namespace LeaderShip.EditorTools
             var restart = TextButton("RestartButton", panel, 30, 330, 700, 88, "Play Again", 30, Palette.Progress);
 
             var view = holder.gameObject.AddComponent<ResultView>();
-            view.EditorAssign(root.gameObject, title, headline, style, breakdown, restart);
+            view.EditorAssign(root.gameObject, panel, panelGroup, title, headline, style, breakdown, restart);
             root.gameObject.SetActive(false);
             return view;
         }
@@ -632,13 +795,40 @@ namespace LeaderShip.EditorTools
             return button;
         }
 
+        /// <summary>
+        /// เส้นคั่นเป็นแถบบางสีเดียว ไม่ใช้สไปรต์ 9-slice ของชุดอาร์ต
+        /// สไปรต์เส้นคั่นสูง 44px ถ้าย่อลงมาต่ำกว่าขอบ 9-slice ของมัน ลายมุมจะบิดจนเห็นเป็นรอยแปลก ๆ
+        /// </summary>
+        /// <summary>ป้ายคีย์ลัดสี่เหลี่ยมเล็ก ๆ ติดกับสิ่งที่มันสั่ง ไม่ใช่รวมไว้เป็นรายการที่อื่น</summary>
+        static void KeyBadge(string name, Transform parent, float x, float y, string key)
+        {
+            var rt = NewRect(name, parent, x, y, 38, 34);
+
+            var image = rt.gameObject.AddComponent<Image>();
+            image.sprite = _plainSprite;
+            image.type = Image.Type.Sliced;
+            image.color = Palette.ButtonDisabled;
+            image.raycastTarget = false;
+
+            Text("Key", rt, 0, 0, 38, 34, key, 19, Palette.TextMuted, TextAlignmentOptions.Center);
+        }
+
+        static string ShortcutFor(CommandType type)
+        {
+            switch (type)
+            {
+                case CommandType.Push: return "Q";
+                case CommandType.Work: return "W";
+                case CommandType.Direct: return "E";
+                default: return "R";
+            }
+        }
+
         static void Divider(string name, Transform parent, float x, float y, float w, float h)
         {
-            if (_dividerSprite == null) return;
-
-            var rt = NewRect(name, parent, x, y, w, h);
+            var rt = NewRect(name, parent, x, y + Mathf.Max(0f, (h - 2f) * 0.5f), w, 2f);
             var image = rt.gameObject.AddComponent<Image>();
-            image.sprite = _dividerSprite;
+            image.sprite = _plainSprite;
             image.type = Image.Type.Sliced;
             image.color = Palette.PanelBorder;
             image.raycastTarget = false;

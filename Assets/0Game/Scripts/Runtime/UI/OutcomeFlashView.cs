@@ -20,6 +20,7 @@ namespace LeaderShip.UI
         [SerializeField] GameObject root;
         [SerializeField] RectTransform panel;
         [SerializeField] CanvasGroup group;
+        [SerializeField] CanvasGroup dimmerGroup;
         [SerializeField] TMP_Text headlineText;
         [SerializeField] TMP_Text captionText;
 
@@ -27,6 +28,7 @@ namespace LeaderShip.UI
         [SerializeField] float holdSeconds = 0.40f;
 
         Sequence _sequence;
+        bool _cancelling;
 
         void Awake() => Hide();
 
@@ -68,21 +70,33 @@ namespace LeaderShip.UI
             panel.localScale = Vector3.one * 0.55f;
             if (group != null) group.alpha = 0f;
 
+            // หน้าจอหลังมันรกเกินกว่าจะอ่านตัวอักษรใหญ่ ๆ ทับได้ ต้องหรี่ลงชั่วขณะ
+            if (dimmerGroup != null) dimmerGroup.alpha = 0f;
+
             _sequence = DOTween.Sequence().SetUpdate(true).SetLink(gameObject);
+            if (dimmerGroup != null) _sequence.Join(dimmerGroup.DOFade(1f, 0.14f));
             _sequence.Append(panel.DOScale(1f, 0.24f).SetEase(Ease.OutBack, 2.2f));
             if (group != null) _sequence.Join(group.DOFade(1f, 0.14f));
 
-            if (positive) _sequence.Append(UiTween.Punch(panel, 0.1f, 0.26f));
-            else _sequence.Append(UiTween.Shake(panel, 26f, 0.34f));
+            // สร้าง tween ตรงนี้เอง ไม่เรียกผ่าน UiTween เพราะตัวช่วยพวกนั้นฆ่า tween เดิมของเป้าหมายก่อน
+            // ซึ่งจะไปฆ่า DOScale ที่เพิ่ง Append เข้าซีเควนซ์นี้ แล้วทั้งซีเควนซ์จะตายก่อนถึง OnComplete
+            if (positive)
+                _sequence.Append(panel.DOPunchScale(Vector3.one * 0.1f, 0.26f, 8, 0.9f));
+            else
+                _sequence.Append(panel.DOPunchAnchorPos(new Vector2(26f, 0f), 0.34f, 12, 1f));
 
             _sequence.AppendInterval(holdSeconds);
             _sequence.Append(panel.DOAnchorPos(restPosition + new Vector2(0f, 52f), 0.2f).SetEase(Ease.InQuad));
             if (group != null) _sequence.Join(group.DOFade(0f, 0.2f));
+            if (dimmerGroup != null) _sequence.Join(dimmerGroup.DOFade(0f, 0.2f));
 
-            _sequence.OnComplete(() =>
+            UiTween.WhenDone(_sequence, () =>
             {
                 panel.anchoredPosition = restPosition;
                 Hide();
+
+                // Cancel() ฆ่าซีเควนซ์ตอนเริ่มรอบใหม่ ซึ่งไม่ควรนับเป็น "เล่าจบ"
+                if (_cancelling) return;
                 onComplete?.Invoke();
             });
         }
@@ -95,8 +109,10 @@ namespace LeaderShip.UI
         /// <summary>ตัดอนิเมชันทิ้งทันที ใช้ตอนเริ่มรอบใหม่ระหว่างที่ยังเล่นค้างอยู่</summary>
         public void Cancel()
         {
+            _cancelling = true;
             _sequence?.Kill();
             _sequence = null;
+            _cancelling = false;
             Hide();
         }
 
@@ -114,11 +130,12 @@ namespace LeaderShip.UI
 
 #if UNITY_EDITOR
         public void EditorAssign(GameObject rootObject, RectTransform panelRect, CanvasGroup canvasGroup,
-            TMP_Text headline, TMP_Text caption)
+            CanvasGroup dimmer, TMP_Text headline, TMP_Text caption)
         {
             root = rootObject;
             panel = panelRect;
             group = canvasGroup;
+            dimmerGroup = dimmer;
             headlineText = headline;
             captionText = caption;
         }

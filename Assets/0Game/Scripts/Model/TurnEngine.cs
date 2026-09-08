@@ -137,7 +137,7 @@ namespace LeaderShip.Model
                     Reason = def.Title
                 };
 
-                AddLog($"⚠ {def.Title} — {def.Body} (in {def.WarningLeadTurns} turns the deadline loses {def.WarningDeadlineCut})",
+                AddLog($"[!] {def.Title} — {def.Body} (in {def.WarningLeadTurns} turns the deadline loses {def.WarningDeadlineCut})",
                     LogTone.Warning);
                 return;
             }

@@ -64,18 +64,58 @@ namespace LeaderShip.UI
             var seq = DOTween.Sequence().SetUpdate(true).SetLink(rect.gameObject);
             seq.Join(rect.DOScale(0.94f, duration).SetEase(Ease.InQuad));
             if (group != null) seq.Join(group.DOFade(0f, duration).SetEase(Ease.InQuad));
-            if (onComplete != null) seq.OnComplete(() => onComplete());
+            WhenDone(seq, onComplete);
 
             return seq;
         }
 
-        /// <summary>กระตุกเพื่อบอกว่า "ตรงนี้เพิ่งเปลี่ยน" ใช้กับปุ่มที่เพิ่งกด และการ์ดที่เพิ่งถูกเลือก</summary>
-        public static Tween Punch(Transform target, float strength = 0.14f, float duration = 0.3f)
+        /// <summary>
+        /// เรียก <paramref name="onDone"/> ครั้งเดียวเสมอ ไม่ว่าซีเควนซ์จะจบเองหรือถูกฆ่ากลางทาง
+        ///
+        /// จำเป็นเพราะ callback พวกนี้เป็นตัวปลดล็อกอินพุตของเกม
+        /// ถ้ามันไม่ยิง ผู้เล่นจะกดอะไรไม่ได้อีกเลยและไม่มีทางรู้ว่าทำไม
+        /// </summary>
+        public static void WhenDone(Sequence sequence, Action onDone)
+        {
+            if (onDone == null) return;
+
+            if (sequence == null)
+            {
+                onDone();
+                return;
+            }
+
+            bool fired = false;
+            void Fire()
+            {
+                if (fired) return;
+                fired = true;
+                onDone();
+            }
+
+            sequence.OnComplete(Fire);
+            sequence.OnKill(Fire);
+        }
+
+        /// <summary>
+        /// กระตุกเพื่อบอกว่า "ตรงนี้เพิ่งเปลี่ยน" ใช้กับปุ่มที่เพิ่งกด และการ์ดที่เพิ่งถูกเลือก
+        ///
+        /// <paramref name="killExisting"/> ต้องเป็น false เมื่อเป้าหมายกำลังมี tween ตัวอื่นทำงานอยู่
+        /// และเราตั้งใจให้มันทำงานต่อ — <c>DOTween.Kill(target)</c> ฆ่า **ทุก** tween ของอ็อบเจกต์นั้น
+        /// รวมถึงตัวที่ถูก nest อยู่ใน Sequence ซึ่งจะทำให้ทั้ง Sequence ตายกลางทางแบบเงียบ ๆ
+        /// (เคยพังมาแล้ว: แฟลชกลางจอค้าง ป๊อปอัปไม่เคยขึ้น เพราะ Punch ไปฆ่า DOScale ในซีเควนซ์เดียวกัน)
+        /// </summary>
+        public static Tween Punch(Transform target, float strength = 0.14f, float duration = 0.3f,
+            bool killExisting = true)
         {
             if (target == null) return null;
 
-            DOTween.Kill(target);
-            target.localScale = Vector3.one;
+            if (killExisting)
+            {
+                DOTween.Kill(target);
+                target.localScale = Vector3.one;
+            }
+
             return target.DOPunchScale(Vector3.one * strength, duration, 8, 0.9f)
                 .SetUpdate(true)
                 .SetLink(target.gameObject);

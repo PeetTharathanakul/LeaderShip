@@ -44,65 +44,96 @@ namespace LeaderShip.UI
 
         public bool IsOpen { get; private set; }
 
+        /// <summary>ตอนปิดแบบบังคับ (เริ่มรอบใหม่ / ปิดซีน) การฆ่า tween ต้องไม่นับเป็น "ผู้เล่นกด Continue"</summary>
+        bool _suppressContinue;
+
         void Awake()
         {
             if (continueButton != null) continueButton.onClick.AddListener(RequestContinue);
             HideImmediate();
         }
 
-        // ------------------------------------------------------------------ เปิด
+        // ------------------------------------------------------------------ เนื้อหา
+
+        /// <summary>
+        /// เนื้อหาที่จะโชว์ ประกอบไว้ **ตอนที่ผลเพิ่งเกิด** ไม่ใช่ตอนเปิดป๊อปอัป
+        ///
+        /// สำคัญ: กว่าป๊อปอัปจะเปิด เทิร์นเดินไปแล้ว (ทีมผลิตงานเอง เดดไลน์ลด อาจขึ้นเทิร์นใหม่)
+        /// ถ้าไปอ่าน RunState ตอนเปิด ตัวเลขในเหตุผลจะเป็นของอนาคต แล้วผู้เล่นจะรู้สึกว่าโดนโกง
+        /// </summary>
+        public struct Payload
+        {
+            public string Title;
+            public string Status;
+            public Color StatusColor;
+            public string Reason;
+            public List<StatDelta> Deltas;
+        }
 
         /// <summary>ผลของคำสั่งหนึ่งครั้ง</summary>
-        public void ShowCommand(CommandResult result, RunState state)
+        public static Payload BuildCommand(CommandResult result, RunState state)
         {
             var member = state.Members[result.MemberIndex];
 
-            Show($"{member.Def.DisplayName}  ·  {GameText.CommandName(result.Preview.Type)}",
-                GameText.OutcomeHeadline(result.Outcome),
-                OutcomeFlashView.ColorFor(result.Outcome),
-                GameText.OutcomeReason(result, state),
-                GameText.CommandDeltas(result));
+            return new Payload
+            {
+                Title = $"{member.Def.DisplayName}  ·  {GameText.CommandName(result.Preview.Type)}",
+                Status = GameText.OutcomeHeadline(result.Outcome),
+                StatusColor = OutcomeFlashView.ColorFor(result.Outcome),
+                Reason = GameText.OutcomeReason(result, state),
+                Deltas = GameText.CommandDeltas(result)
+            };
         }
 
         /// <summary>ผลของเหตุการณ์ — รวมกรณี "ไม่รับ" ซึ่งมีราคาของมันเสมอ (ADR-0005)</summary>
-        public void ShowEvent(EventResult result)
+        public static Payload BuildEvent(EventResult result)
         {
             string title = result.Preview.Def.Title;
             var deltas = GameText.EventDeltas(result.Applied);
 
             if (!result.Accepted)
             {
-                Show(title, "DECLINED", Palette.Warning,
-                    $"You turned it down. {result.Applied.Text}", deltas);
-                return;
+                return new Payload
+                {
+                    Title = title,
+                    Status = "DECLINED",
+                    StatusColor = Palette.Warning,
+                    Reason = $"You turned it down, and that has a price of its own. {result.Applied.Text}",
+                    Deltas = deltas
+                };
             }
 
             if (result.CredibilityGain > 0.5f)
                 deltas.Add(new StatDelta("Credibility", GameText.Signed(result.CredibilityGain, 0), Sentiment.Good));
 
-            Show(title,
-                result.Succeeded ? "SUCCESS" : "FAILED",
-                result.Succeeded ? Palette.Good : Palette.Danger,
-                $"{result.Applied.Text} " +
-                $"(you were shown {GameText.Percent(result.Preview.SuccessChance)})",
-                deltas);
+            return new Payload
+            {
+                Title = title,
+                Status = result.Succeeded ? "SUCCESS" : "FAILED",
+                StatusColor = result.Succeeded ? Palette.Good : Palette.Danger,
+                Reason = $"{result.Applied.Text} " +
+                         $"(you were shown {GameText.Percent(result.Preview.SuccessChance)})",
+                Deltas = deltas
+            };
         }
 
-        void Show(string title, string status, Color statusColor, string reason, IList<StatDelta> deltas)
+        // ------------------------------------------------------------------ เปิด
+
+        public void Show(Payload payload)
         {
             if (root == null || panel == null) return;
 
-            if (titleText != null) titleText.text = title;
+            if (titleText != null) titleText.text = payload.Title;
 
             if (statusText != null)
             {
-                statusText.text = status;
-                statusText.color = statusColor;
+                statusText.text = payload.Status;
+                statusText.color = payload.StatusColor;
             }
 
-            if (reasonText != null) reasonText.text = reason;
+            if (reasonText != null) reasonText.text = payload.Reason;
 
-            int shown = FillRows(deltas);
+            int shown = FillRows(payload.Deltas);
 
             if (emptyText != null)
             {
@@ -184,6 +215,7 @@ namespace LeaderShip.UI
             UiTween.PopOut(panel, panelGroup, () =>
             {
                 if (root != null) root.SetActive(false);
+                if (_suppressContinue) return;
                 ContinueRequested?.Invoke();
             });
         }
@@ -192,13 +224,18 @@ namespace LeaderShip.UI
         public void HideImmediate()
         {
             IsOpen = false;
+            _suppressContinue = true;
             if (panel != null) UiTween.Kill(panel);
+            _suppressContinue = false;
+
             if (root != null) root.SetActive(false);
         }
 
         void OnDisable()
         {
+            _suppressContinue = true;
             if (panel != null) UiTween.Kill(panel);
+            _suppressContinue = false;
         }
 
 #if UNITY_EDITOR

@@ -10,6 +10,8 @@ namespace LeaderShip.UI
     public sealed class ResultView : MonoBehaviour
     {
         [SerializeField] GameObject root;
+        [SerializeField] RectTransform panel;
+        [SerializeField] CanvasGroup panelGroup;
         [SerializeField] TMP_Text titleText;
         [SerializeField] TMP_Text headlineText;
         [SerializeField] TMP_Text styleText;
@@ -39,18 +41,29 @@ namespace LeaderShip.UI
             if (breakdownText != null) breakdownText.text = RunSummary.CommandBreakdown(state);
 
             if (root != null) root.SetActive(true);
+
+            UiTween.PopIn(panel, panelGroup, 0.82f, UiTween.Slow);
+            if (titleText != null) UiTween.Punch(titleText.transform, 0.12f, 0.4f);
         }
 
         public void Hide()
         {
+            if (panel != null) UiTween.Kill(panel);
             if (root != null) root.SetActive(false);
         }
 
+        void OnDisable()
+        {
+            if (panel != null) UiTween.Kill(panel);
+        }
+
 #if UNITY_EDITOR
-        public void EditorAssign(GameObject rootObject, TMP_Text title, TMP_Text headline,
-            TMP_Text style, TMP_Text breakdown, Button restart)
+        public void EditorAssign(GameObject rootObject, RectTransform panelRect, CanvasGroup panelCanvasGroup,
+            TMP_Text title, TMP_Text headline, TMP_Text style, TMP_Text breakdown, Button restart)
         {
             root = rootObject;
+            panel = panelRect;
+            panelGroup = panelCanvasGroup;
             titleText = title;
             headlineText = headline;
             styleText = style;
