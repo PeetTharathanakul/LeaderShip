@@ -9,9 +9,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 0}
+  m_Script: {fileID: 11500000, guid: 904633179c6184f43a3714ef5920c7ba, type: 3}
   m_Name: Event_lend_a_hand
-  m_EditorClassIdentifier: LeaderShip.Runtime:LeaderShip.Data:EventDefinitionSO
+  m_EditorClassIdentifier: 
   definition:
     Id: lend_a_hand
     Title: The team next door wants to borrow someone for half a day

@@ -5,56 +5,9 @@ using UnityEngine;
 namespace LeaderShip.Data
 {
     /// <summary>
-    /// ค่าบาลานซ์ทั้งหมดของเกม — ตาม .agents/AGENTS.md ต้องอยู่ใน ScriptableObject ห้าม hardcode
-    /// แก้ไฟล์นี้แล้วรัน Balance Simulator ซ้ำได้ทันที ไม่ต้องคอมไพล์ใหม่
+    /// รวมทุกอย่างเข้าเป็น GameContent ก้อนเดียวให้ชั้นโมเดลใช้
+    /// ดูกฎ "หนึ่งคลาสต่อหนึ่งไฟล์" ที่ <see cref="BalanceConfigSO"/>
     /// </summary>
-    [CreateAssetMenu(menuName = "LeaderShip/Balance Config", fileName = "BalanceConfig")]
-    public sealed class BalanceConfigSO : ScriptableObject
-    {
-        [SerializeField] BalanceData data = new BalanceData();
-
-        /// <summary>คืนสำเนาเสมอ เพื่อไม่ให้รอบเล่นเขียนทับ asset บนดิสก์ตอนรันใน Editor</summary>
-        public BalanceData CreateData() => data.Clone();
-
-#if UNITY_EDITOR
-        public void EditorSetData(BalanceData value) => data = value;
-#endif
-    }
-
-    [CreateAssetMenu(menuName = "LeaderShip/Member", fileName = "Member")]
-    public sealed class MemberDefinitionSO : ScriptableObject
-    {
-        [SerializeField] MemberDefinition definition = new MemberDefinition();
-        public MemberDefinition Definition => definition;
-
-#if UNITY_EDITOR
-        public void EditorSetData(MemberDefinition value) => definition = value;
-#endif
-    }
-
-    [CreateAssetMenu(menuName = "LeaderShip/Command", fileName = "Command")]
-    public sealed class CommandDefinitionSO : ScriptableObject
-    {
-        [SerializeField] CommandDefinition definition = new CommandDefinition();
-        public CommandDefinition Definition => definition;
-
-#if UNITY_EDITOR
-        public void EditorSetData(CommandDefinition value) => definition = value;
-#endif
-    }
-
-    [CreateAssetMenu(menuName = "LeaderShip/Event", fileName = "Event")]
-    public sealed class EventDefinitionSO : ScriptableObject
-    {
-        [SerializeField] EventDefinition definition = new EventDefinition();
-        public EventDefinition Definition => definition;
-
-#if UNITY_EDITOR
-        public void EditorSetData(EventDefinition value) => definition = value;
-#endif
-    }
-
-    /// <summary>รวมทุกอย่างเข้าเป็น GameContent ก้อนเดียวให้ชั้นโมเดลใช้</summary>
     [CreateAssetMenu(menuName = "LeaderShip/Game Content", fileName = "GameContent")]
     public sealed class GameContentSO : ScriptableObject
     {

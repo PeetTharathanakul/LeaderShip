@@ -9,9 +9,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 0}
+  m_Script: {fileID: 11500000, guid: cbd60574cd22306428c799a4bf5dc577, type: 3}
   m_Name: Member_kai
-  m_EditorClassIdentifier: LeaderShip.Runtime:LeaderShip.Data:MemberDefinitionSO
+  m_EditorClassIdentifier: 
   definition:
     Id: kai
     DisplayName: Kai

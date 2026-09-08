@@ -9,9 +9,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 0}
+  m_Script: {fileID: 11500000, guid: 904633179c6184f43a3714ef5920c7ba, type: 3}
   m_Name: Event_warn_sales_promise
-  m_EditorClassIdentifier: LeaderShip.Runtime:LeaderShip.Data:EventDefinitionSO
+  m_EditorClassIdentifier: 
   definition:
     Id: warn_sales_promise
     Title: Sales already promised the client a date
